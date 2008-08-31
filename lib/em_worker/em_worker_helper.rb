@@ -18,6 +18,18 @@ module EmWorker
         end
       end # end of load_data method
     end
+
+    def gen_worker_key worker_name,worker_key
+      [worker_name,worker_key].compact.join("_")
+    end
+
+    def object_dump p_data
+      object_dump = Marshal.dump(p_data)
+      dump_length = object_dump.length.to_s
+      length_str = dump_length.rjust(9,'0')
+      final_data = length_str + object_dump
+    end
+
     def metaclass; class << self; self; end; end
     def iattr_accessor *args
       metaclass.instance_eval do
