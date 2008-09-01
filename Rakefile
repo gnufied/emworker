@@ -39,7 +39,7 @@ spec = Gem::Specification.new do |s|
   #s.extra_rdoc_files = [""]
   #s.rdoc_options += RDOC_OPTS +
   #  ['--exclude', '^(app|uploads)']
-  s.summary = "EmWorker, A Pure Ruby library for Event Driven Network Programming."
+  s.summary = "EmWorker, A BackgrounDRb clone on top of EventMachine"
   s.description = s.summary
   s.author = "Hemant Kumar"
   s.email = 'mail@gnufied.org'
