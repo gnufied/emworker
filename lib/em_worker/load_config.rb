@@ -1,6 +1,6 @@
 module EmWorker
   class Config
-    def config &block
+    def self.config &block
       instance_eval(block)
     end
 
