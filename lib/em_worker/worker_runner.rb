@@ -5,7 +5,7 @@ module EmWorker
     def initialize args
       cmd_args = args[0].split(':')
 
-      @worker_name = cmd_args[0]
+      @worker_name,@worker_key = cmd_args[0].split("^")
       @server_ip = cmd_args[1]
       @server_port = cmd_args[2].to_i
       @worker_root = cmd_args[3]
@@ -17,6 +17,7 @@ module EmWorker
       if worker_root && File.file?("#{worker_root}/#{worker_name}.rb")
         require "#{worker_root}/#{worker_name}"
         worker_klass = Object.const_get(em_worker_classify(worker_name))
+        worker_klass.worker_key = @worker_key
         worker_klass.start_worker("localhost",9000)
       end
     end

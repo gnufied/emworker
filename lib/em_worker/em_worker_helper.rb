@@ -20,7 +20,7 @@ module EmWorker
     end
 
     def gen_worker_key worker_name,worker_key
-      [worker_name,worker_key].compact.join("_")
+      [worker_name,worker_key].compact.join("^")
     end
 
     def object_dump p_data
@@ -49,6 +49,11 @@ module EmWorker
     end
 
     def config; Config::EM_WORKER_CONFIG; end
+
+    def compact(options = { })
+      options.delete_if { |key,value| value.nil? }
+      options
+    end
 
     def self.load_config
       return if defined?(Config::EM_WORKER_CONFIG)
