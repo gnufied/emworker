@@ -6,18 +6,26 @@ module EmWorker
     attr_accessor :log
 
     def start_worker options = {}
-
+      worker_name = options[:worker].to_s
+      worker_name_key = gen_worker_key(worker_name,options[:worker_key])
+      return if @@worker_signatures[worker_name_key]
+      @@live_workers[worker_name_key] = options
+      fork_and_load(options)
     end
 
-    def fork_and_load
+    def fork_and_load options = {}
       if(!fork)
         [STDOUT,STDIN,STDERR].each { |x| x.reopen(@@log_file) }
-        exec(prepare_cmd_line)
+        exec(prepare_cmd_line(options))
       end
     end
 
-    def prepare_cmd_line *args
-      "em_runner #{args.join(":")}"
+    def prepare_cmd_line options
+      cmd_string = "em_runner #{options[:worker]}"
+      cmd_string << ":#{server_ip}:#{server_port}"
+      cmd_string << ":#{WORKER_ROOT}" if defined? WORKER_ROOT
+      cmd_string << ":#{WORKER_LOAD_ENV}" if defined? WORKER_LOAD_ENV
+      cmd
     end
 
     def write_to_worker worker_uuid,data

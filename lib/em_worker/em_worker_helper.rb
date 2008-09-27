@@ -42,6 +42,11 @@ module EmWorker
         end
       end
     end
+
+    def em_worker_classify original_string
+      original_string.split('_').map {|x| x.capitalize}.join
+    end
+
     module_function(:metaclass,:iattr_accessor,:load_data)
   end
 end

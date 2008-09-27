@@ -7,7 +7,10 @@ module EmWorker
       t = new
       t.server_ip = server_ip
       t.server_port = server_port
-      EventMachine.connect(server_ip,server_port)
+      EventMachine.run {
+        EventMachine.connect(server_ip,server_port)
+        t.worker_init if t.respond_to?(:worker_init)
+      }
     end
 
     def initialize *args
