@@ -4,12 +4,11 @@ module EmWorker
     attr_accessor :server_ip,:server_port
     attr_accessor :heartbeat_received
     def self.start_worker server_ip,server_port
-      t = new
-      t.server_ip = server_ip
-      t.server_port = server_port
       EventMachine.run {
-        EventMachine.connect(server_ip,server_port)
-        t.worker_init if t.respond_to?(:worker_init)
+        EventMachine.connect(server_ip,server_port,self) do |conn|
+          conn.server_ip = server_ip
+          conn.server_port = server_port
+        end
       }
     end
 

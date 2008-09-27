@@ -1,8 +1,9 @@
 module EmWorker
   class Runner
     attr_accessor :worker_root,:worker_name,:worker_load_env,:server_ip,:server_port
+    include Helper
     def initialize args
-      cmd_args = args.split(':')
+      cmd_args = args[0].split(':')
 
       @worker_name = cmd_args[0]
       @server_ip = cmd_args[1]
@@ -15,7 +16,8 @@ module EmWorker
     def load_worker
       if worker_root && File.file?("#{worker_root}/#{worker_name}.rb")
         require "#{worker_root}/#{worker_name}"
-        worker_klass = Object.const_get(packet_classify(worker_name))
+        worker_klass = Object.const_get(em_worker_classify(worker_name))
+        worker_klass.start_worker("localhost",9000)
       end
     end
   end

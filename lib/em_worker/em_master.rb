@@ -7,6 +7,7 @@ module EmWorker
 
     # workers who were forked off, but whose connection is in known state
     @@live_workers = {}
+    @@workers_loaded = false
     iattr_accessor :server_ip,:server_port
     attr_accessor :log
 
@@ -15,6 +16,10 @@ module EmWorker
       EventMachine.run {
         EM.start_server("localhost",9000,self)
       }
+    end
+
+    def load_all_workers
+      start_worker(:worker => "sample_worker")
     end
 
     def start_worker options = {}
@@ -26,19 +31,21 @@ module EmWorker
     end
 
     def fork_and_load options = {}
-      if(!fork)
+      if(!(pid = fork))
         #[STDOUT,STDIN,STDERR].each { |x| x.reopen(@@log_file) }
         cmd_string = prepare_cmd_line(options)
-        p cmd_string
         exec(cmd_string)
       end
+      Process.detach(pid)
     end
 
     def prepare_cmd_line options
-      cmd_string = "em_runner #{options[:worker]}"
+      cmd_string = "./bin/em_runner #{options[:worker]}"
       cmd_string << ":#{server_ip}:#{server_port}"
-      cmd_string << ":#{WORKER_ROOT}" if defined? WORKER_ROOT
-      cmd_string << ":#{WORKER_LOAD_ENV}" if defined? WORKER_LOAD_ENV
+      worker_root = options[:worker_root] || (defined? WORKER_ROOT) ? WORKER_ROOT : nil
+      cmd_string << ":#{worker_root}" if worker_root && !worker_root.empty?
+      worker_env = options[:worker_env] || (defined? WORKER_LOAD_ENV) ? WORKER_LOAD_ENV : nil
+      cmd_string << ":#{worker_env}" if worker_env && !worker_env.empty?
       cmd_string
     end
 
@@ -49,7 +56,6 @@ module EmWorker
 
     def write_to_client data
       t = object_dump(data)
-      p t
       send_data(t)
     end
 
@@ -70,7 +76,15 @@ module EmWorker
     end
 
     def dispatch ruby_data
-      case ruby_data[:type]
+      request_type = ruby_data[:type]
+      begin
+        ruby_data.delete(:type)
+      rescue
+        log.info(ruby_data)
+        return
+      end
+
+      case request_type
       when :worker_hello; process_worker_hello(ruby_data)
       when :worker_response; receive_worker_response(ruby_data)
       when :async_invoke; async_method_invoke(ruby_data)
@@ -89,6 +103,7 @@ module EmWorker
 
     # called when connection gets completed
     def post_init
+      load_all_workers unless @@workers_loaded
       @bin_parser = BinParser.new
       @log = Log.new
     end
