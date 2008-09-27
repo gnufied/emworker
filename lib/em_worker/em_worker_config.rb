@@ -7,7 +7,11 @@ module EmWorker
     attributes %w(boot servers)
   end
 
-  class WorkerConfig
+  class ClientConfig
+    attributes %w(servers)
+  end
+
+  class Config
     attr_accessor :server, :worker
     def self.config &block
       t = new
