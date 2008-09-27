@@ -1,9 +1,16 @@
 module EmWorker
-  class EmMaster
+  class EmMaster < EventMachine::Connection
     include Base
     @@live_workers = {}
     @@worker_signatures = {}
     attr_accessor :log
+
+
+    def self.start_master_process
+      EventMachine.run {
+        EM.start_server("localhost",9000,self)
+      }
+    end
 
     def start_worker options = {}
       worker_name = options[:worker].to_s
@@ -42,7 +49,7 @@ module EmWorker
       worker_name = helo_msg[:worker_name]
       worker_key = helo_msg[:worker_key]
       worker_uuid = gen_worker_key(worker_name,worker_key)
-      @@worker_signatures[worker_uuid] =
+      @@worker_signatures[self.signature] =
         OpenStruct(:worker_name => worker_name,:worker_key => worker_key,:connection => self)
       write_to_client(@@live_workers[worker_uuid].options)
     end
@@ -64,14 +71,14 @@ module EmWorker
       when :delete_worker; delete_worker_request(ruby_data)
       when :worker_info; get_worker_info(ruby_data)
       when :all_worker_info; get_all_worker_info(ruby_data)
-      else; log(ruby_data)
+      else; log.info(ruby_data)
       end
     end
 
     # called when connection gets completed
     def post_init
       @bin_parser = BinParser.new
-      @log = STDOUT
+      @log = Log.new
     end
 
     def unbind

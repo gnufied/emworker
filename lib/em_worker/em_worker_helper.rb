@@ -38,7 +38,7 @@ module EmWorker
       args.each do |attr|
         class_eval do
           define_method(attr) { self.class.send(attr)}
-          define_method("#{attr}=") { |value| self.class.send("#{attr}="),value}
+          define_method("#{attr}=") { |value| self.class.send("#{attr}=",value) }
         end
       end
     end
