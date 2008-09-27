@@ -5,6 +5,7 @@ require "rubygems"
 require "eventmachine"
 require "forwardable"
 require "ostruct"
+require "attributes"
 
 module EmWorker
   VERSION = "0.0.1"
@@ -15,4 +16,5 @@ module EmWorker
   autoload :Base, "em_worker/em_base"
   autoload :Helper, "em_worker/em_worker_helper"
   autoload :Log, "em_worker/em_log"
+  autoload :Config, "em_worker/em_worker_config"
 end

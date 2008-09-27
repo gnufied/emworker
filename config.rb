@@ -9,5 +9,6 @@ EmWorker::Config.config {
   }
   worker {
     boot File.join(File.dirname(__FILE__),"..","config","environment")
+    servers ["localhost:9000","localhost:10000"]
   }
 }
