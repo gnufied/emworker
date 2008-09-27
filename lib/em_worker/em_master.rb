@@ -14,7 +14,7 @@ module EmWorker
 
     def self.start_master_process
       EventMachine.run {
-        EM.start_server("localhost",9000,self)
+        EM.start_server(config.s.server_host,config.s.server_port,self)
       }
     end
 

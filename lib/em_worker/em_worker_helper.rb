@@ -47,5 +47,13 @@ module EmWorker
     def em_worker_classify original_string
       original_string.split('_').map {|x| x.capitalize}.join
     end
+
+    def config; Config::EM_WORKER_CONFIG; end
+
+    def self.load_config
+      return if defined?(Config::EM_WORKER_CONFIG)
+      require "#{EM_WORKER_ROOT}/config/config.rb"
+    end
+    load_config
   end
 end

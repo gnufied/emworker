@@ -2,6 +2,7 @@
 
 dir = File.dirname(__FILE__)
 $:.unshift(File.join(dir,"..","lib"))
+WORKER_ROOT = File.join(dir,"..","workers")
+EM_WORKER_ROOT = File.join(dir,"..")
 require "em_worker"
-puts "i am hereby"
 EmWorker::Runner.new(ARGV)

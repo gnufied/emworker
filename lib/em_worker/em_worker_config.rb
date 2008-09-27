@@ -12,20 +12,24 @@ module EmWorker
   end
 
   class Config
-    attr_accessor :server, :worker
+    attr_accessor :s,:w,:c
     def self.config &block
-      t = new
-      t.instance_eval &block
+      Config.const_set(:EM_WORKER_CONFIG,new)
+      EM_WORKER_CONFIG.instance_eval &block
     end
 
     def server &block
-      @server = ServerConfig.new
-      @server.instance_eval &block
+      @s = ServerConfig.new
+      @s.instance_eval &block
     end
 
     def worker &block
-      @worker = WorkerConfig.new
-      @worker.instance_eval &block
+      @w = WorkerConfig.new
+      @w.instance_eval &block
+    end
+    def client &block
+      @c = ClientConfig.new
+      @c.instance_eval &block
     end
   end
 end
