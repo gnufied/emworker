@@ -12,4 +12,15 @@ context "For Master process" do
     @em_master.log.expects(:info).with("hello world")
     @em_master.receive_data(data)
   end
+
+  specify "should invoke process hello hello worker for initial requests" do
+    @em_master.server_port = 9000
+    @em_master.server_ip = "localhost"
+    data1 = object_dump(:worker => "hello",:worker_key => "world",:data => "hello world",:type => :start_worker)
+    @em_master.expects(:fork_and_load).with({:data=>"hello world", :type=>:start_worker, :worker=>"hello", :worker_key=>"world"})
+    @em_master.receive_data(data1)
+    data = object_dump(:worker => "hello",:type => :worker_hello,:worker_key => "world")
+    @em_master.expects(:send_data)
+    @em_master.receive_data(data)
+  end
 end

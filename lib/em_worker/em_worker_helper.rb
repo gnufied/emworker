@@ -31,6 +31,7 @@ module EmWorker
     end
 
     def metaclass; class << self; self; end; end
+
     def iattr_accessor *args
       metaclass.instance_eval do
         attr_accessor *args
@@ -46,7 +47,5 @@ module EmWorker
     def em_worker_classify original_string
       original_string.split('_').map {|x| x.capitalize}.join
     end
-
-    module_function(:metaclass,:iattr_accessor,:load_data)
   end
 end
