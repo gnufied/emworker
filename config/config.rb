@@ -3,11 +3,16 @@
 EmWorker::Config.config {
   # esp for em_worker server
   server {
+    # host and port on which em_worker will be started
     server_host "localhost"
     server_port 9000
+    # main log file
     logfile "/home/hemant/em_worker/log/foo.log"
+    # where are the workers?
     worker_root "/home/hemant/em_worker/workers"
+    # which of the workers should be autoloaded
     autoload_workers [:sample_worker,:foo_worker]
+    # which environment should be loaded in server
     boot File.join(File.dirname(__FILE__),"..","config","environment")
   }
 
