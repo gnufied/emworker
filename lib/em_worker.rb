@@ -6,6 +6,8 @@ require "eventmachine"
 require "forwardable"
 require "ostruct"
 require "attributes"
+require "chronic"
+require "time"
 
 module EmWorker
   VERSION = "0.0.1"
@@ -17,4 +19,5 @@ module EmWorker
   autoload :Helper, "em_worker/em_worker_helper"
   autoload :Log, "em_worker/em_log"
   autoload :Config, "em_worker/em_worker_config"
+  autoload :CronTrigger, "em_worker/cron_trigger"
 end
