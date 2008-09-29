@@ -1,6 +1,6 @@
 module EmWorker
   class ServerConfig
-    attributes %w(server_host server_port logfile worker_root)
+    attributes %w(server_host server_port logfile worker_root boot)
   end
 
   class WorkerConfig

@@ -8,10 +8,13 @@ EmWorker::Config.config {
     logfile "/home/hemant/em_worker/log/foo.log"
     worker_root "/home/hemant/em_worker/workers"
     autoload_workers [:sample_worker,:foo_worker]
+    boot File.join(File.dirname(__FILE__),"..","config","environment")
   }
 
   # for worker specific things
   worker {
+    # this will be loaded in worker and hence can be used to load merb or rails
+    # environment in workers
     boot File.join(File.dirname(__FILE__),"..","config","environment")
   }
 

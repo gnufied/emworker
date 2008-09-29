@@ -8,6 +8,8 @@ module EmWorker
     # workers who were forked off, but whose connection is in known state
     @@live_workers = {}
     @@workers_loaded = false
+    @@boot_env_loaded = false
+
     iattr_accessor :server_ip,:server_port
     attr_accessor :log
 
@@ -105,9 +107,14 @@ module EmWorker
       start_worker(ruby_data)
     end
 
+    def load_boot_env
+      require config.s.boot
+    end
+
     # called when connection gets completed
     def post_init
       load_all_workers unless @@workers_loaded
+      load_boot_env unless @@boot_env_loaded
       @bin_parser = BinParser.new
       @log = Log.new
     end

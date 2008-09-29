@@ -4,6 +4,7 @@ module EmWorker
     attr_accessor :server_ip,:server_port
     attr_accessor :heartbeat_received
     iattr_accessor :worker_name,:worker_key,:autoload
+    @@boot_env_loaded = false
 
     def self.start_worker server_ip,server_port
       EventMachine.run {
@@ -12,6 +13,10 @@ module EmWorker
           conn.server_port = server_port
         end
       }
+    end
+
+    def load_boot_env
+      require config.w.boot
     end
 
     def initialize *args
@@ -38,7 +43,8 @@ module EmWorker
     end
 
     def get_options ruby_data
-      p ruby_data
+      load_boot_env unless @@boot_env_loaded
+
       @worker_options = ruby_data
       heartbeat_received = true
       worker_init if self.respond_to?(:worker_init)
