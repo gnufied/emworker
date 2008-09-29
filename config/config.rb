@@ -21,6 +21,11 @@ EmWorker::Config.config {
     # this will be loaded in worker and hence can be used to load merb or rails
     # environment in workers
     boot File.join(File.dirname(__FILE__),"..","config","environment")
+    schedules {
+      :foo_worker => {
+        :barbar => { :trigger_args => ""}
+      }
+    }
   }
 
   # for client specific things
