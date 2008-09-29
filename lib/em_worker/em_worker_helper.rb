@@ -33,13 +33,19 @@ module EmWorker
     def metaclass; class << self; self; end; end
 
     def iattr_accessor *args
-      metaclass.instance_eval do
-        attr_accessor *args
-      end
-      args.each do |attr|
+      args.each do |a|
+        metaclass.instance_eval do
+          define_method("#{a}=") { |value|
+            @a = value
+          }
+          define_method(a) do |*values|
+            return @a if values.empty?
+            @a = values.first
+          end
+        end
         class_eval do
-          define_method(attr) { self.class.send(attr)}
-          define_method("#{attr}=") { |value| self.class.send("#{attr}=",value) }
+          define_method(a) { self.class.send(a)}
+          define_method("#{a}=") { |value| self.class.send(a,value) }
         end
       end
     end

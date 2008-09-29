@@ -17,7 +17,7 @@ module EmWorker
       if worker_root && File.file?("#{worker_root}/#{worker_name}.rb")
         require "#{worker_root}/#{worker_name}"
         worker_klass = Object.const_get(em_worker_classify(worker_name))
-        worker_klass.worker_key = @worker_key
+        worker_klass.worker_key(@worker_key)
         worker_klass.start_worker("localhost",9000)
       end
     end

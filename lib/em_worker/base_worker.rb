@@ -3,7 +3,7 @@ module EmWorker
     include Base
     attr_accessor :server_ip,:server_port
     attr_accessor :heartbeat_received
-    iattr_accessor :worker_name,:worker_key
+    iattr_accessor :worker_name,:worker_key,:autoload
 
     def self.start_worker server_ip,server_port
       EventMachine.run {
@@ -38,6 +38,7 @@ module EmWorker
     end
 
     def get_options ruby_data
+      p ruby_data
       @worker_options = ruby_data
       heartbeat_received = true
       worker_init if self.respond_to?(:worker_init)

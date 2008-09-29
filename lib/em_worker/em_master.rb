@@ -13,13 +13,17 @@ module EmWorker
 
 
     def self.start_master_process
+      self.server_ip = config.s.server_host
+      self.server_port = config.s.server_port
       EventMachine.run {
         EM.start_server(config.s.server_host,config.s.server_port,self)
       }
     end
 
-    def load_all_workers
-      start_worker(:worker => "sample_worker")
+    def autoload_workers
+      config.s.autoload_workers.each do |worker_name|
+        start_worker(:worker => worker_name.to_s)
+      end
     end
 
     def start_worker options = {}
