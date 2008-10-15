@@ -1,0 +1,13 @@
+* Design goals of Em Worker *
+
+** Should use tcp rather than unix sockets for communication between processes
+
+** Workers can be completely started/stopped on demand, out of process. In a nutshell, an 
+   individual worker can be started/stopped from monit and can reconnect to master process.
+
+** Worker and Server crashes should be handled gracefully and logged properly.
+
+** Can be clustered
+** Should be able to auto-spawn workers on demand.
+
+
