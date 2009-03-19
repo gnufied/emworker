@@ -13,47 +13,51 @@ module EmWorker
     iattr_accessor :server_ip,:server_port
     attr_accessor :log
 
-
-    def self.start_master_process
-      self.server_ip = config.s.server_host
-      self.server_port = config.s.server_port
-      EventMachine.run {
-        EM.start_server(config.s.server_host,config.s.server_port,self)
-      }
-    end
-
-    def autoload_workers
-      config.s.autoload_workers.each do |worker_name|
-        start_worker(:worker => worker_name.to_s)
+    class << self
+      def start_master_process
+        autoload_workers
+        self.server_ip = config.s.server_host
+        self.server_port = config.s.server_port
+        EventMachine.run {
+          EM.start_server(config.s.server_host,config.s.server_port,self)
+        }
       end
-    end
 
-    def start_worker options = {}
-      worker_name = options[:worker].to_s
-      worker_name_key = gen_worker_key(worker_name,options[:worker_key])
-      return if @@forked_workers[worker_name_key]
-      @@forked_workers[worker_name_key] = OpenStruct.new(:options => options)
-      fork_and_load(options)
-    end
-
-    def fork_and_load options = {}
-      if(!(pid = fork))
-        #[STDOUT,STDIN,STDERR].each { |x| x.reopen(@@log_file) }
-        cmd_string = prepare_cmd_line(options)
-        exec(cmd_string)
+      def autoload_workers
+        config.s.autoload_workers.each do |worker_name|
+          start_worker(:worker => worker_name.to_s)
+        end
       end
-      Process.detach(pid)
+
+      def start_worker options = {}
+        worker_name = options[:worker].to_s
+        worker_name_key = gen_worker_key(worker_name,options[:worker_key])
+        return if @@forked_workers[worker_name_key]
+        @@forked_workers[worker_name_key] = OpenStruct.new(:options => options)
+        fork_and_load(options)
+      end
+
+      def fork_and_load options = {}
+        if(!(pid = fork))
+          #[STDOUT,STDIN,STDERR].each { |x| x.reopen(@@log_file) }
+          cmd_string = prepare_cmd_line(options)
+          exec(cmd_string)
+        end
+        Process.detach(pid)
+      end
+
+      def prepare_cmd_line options
+        cmd_string = "./bin/em_runner #{options[:worker]}"
+        cmd_string << ":#{server_ip}:#{server_port}"
+        worker_root = options[:worker_root] || (defined? WORKER_ROOT) ? WORKER_ROOT : nil
+        cmd_string << ":#{worker_root}" if worker_root && !worker_root.empty?
+        worker_env = options[:worker_env] || (defined? WORKER_LOAD_ENV) ? WORKER_LOAD_ENV : nil
+        cmd_string << ":#{worker_env}" if worker_env && !worker_env.empty?
+        cmd_string
+      end
+
     end
 
-    def prepare_cmd_line options
-      cmd_string = "./bin/em_runner #{options[:worker]}"
-      cmd_string << ":#{server_ip}:#{server_port}"
-      worker_root = options[:worker_root] || (defined? WORKER_ROOT) ? WORKER_ROOT : nil
-      cmd_string << ":#{worker_root}" if worker_root && !worker_root.empty?
-      worker_env = options[:worker_env] || (defined? WORKER_LOAD_ENV) ? WORKER_LOAD_ENV : nil
-      cmd_string << ":#{worker_env}" if worker_env && !worker_env.empty?
-      cmd_string
-    end
 
     def write_to_worker worker_uuid,data
       t = object_dump(data)
@@ -113,8 +117,6 @@ module EmWorker
 
     # called when connection gets completed
     def post_init
-      load_all_workers unless @@workers_loaded
-      load_boot_env unless @@boot_env_loaded
       @bin_parser = BinParser.new
       @log = Log.new
     end
