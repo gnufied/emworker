@@ -36,16 +36,20 @@ module EmWorker
       args.each do |a|
         metaclass.instance_eval do
           define_method("#{a}=") { |value|
-            @a = value
+            instance_variable_set("@#{a}",value)
           }
           define_method(a) do |*values|
-            return @a if values.empty?
-            @a = values.first
+            return instance_variable_get("@#{a}") if values.empty?
+            instance_variable_set("@#{a}",values.first)
           end
         end
         class_eval do
-          define_method(a) { self.class.send(a)}
-          define_method("#{a}=") { |value| self.class.send(a,value) }
+          define_method(a) {
+            self.class.send(a)
+          }
+          define_method("#{a}=") { |value|
+            self.class.send("#{a}=",value)
+          }
         end
       end
     end
