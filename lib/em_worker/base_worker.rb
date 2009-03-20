@@ -1,6 +1,6 @@
 module EmWorker
   class BaseWorker < EventMachine::Connection
-    include Base
+    include Helper
     attr_accessor :server_ip,:server_port
     attr_accessor :heartbeat_received
     iattr_accessor :worker_name,:worker_key,:autoload

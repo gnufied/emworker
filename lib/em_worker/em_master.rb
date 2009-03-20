@@ -1,6 +1,6 @@
 module EmWorker
   class EmMaster < EventMachine::Connection
-    include Base
+    include Helper
 
     # workers who were forked off, but they are yet to send a helo message
     @@forked_workers = {}
@@ -55,7 +55,6 @@ module EmWorker
         cmd_string << ":#{worker_env}" if worker_env && !worker_env.empty?
         cmd_string
       end
-
     end
 
 

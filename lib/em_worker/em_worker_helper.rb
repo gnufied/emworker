@@ -1,68 +1,77 @@
 module EmWorker
   module Helper
-    def load_data data
-      begin
-        return Marshal.load(data)
-      rescue
-        error_msg = $!.message
-        if error_msg =~ /^undefined\ .+\ ([A-Z].+)/
-          file_name = $1.underscore
-          begin
-            require file_name
-            return Marshal.load(data)
-          rescue
+
+    def self.included(base_klass)
+      base_klass.extend(CommonMethods)
+      base_klass.send(:include,CommonMethods)
+    end
+
+    module CommonMethods
+      def load_data data
+        begin
+          return Marshal.load(data)
+        rescue
+          error_msg = $!.message
+          if error_msg =~ /^undefined\ .+\ ([A-Z].+)/
+            file_name = $1.underscore
+            begin
+              require file_name
+              return Marshal.load(data)
+            rescue
+              return nil
+            end
+          else
             return nil
           end
-        else
-          return nil
-        end
-      end # end of load_data method
-    end
+        end # end of load_data method
+      end
 
-    def gen_worker_key worker_name,worker_key
-      [worker_name,worker_key].compact.join("^")
-    end
+      def gen_worker_key worker_name,worker_key
+        [worker_name,worker_key].compact.join("^")
+      end
 
-    def object_dump p_data
-      object_dump = Marshal.dump(p_data)
-      dump_length = object_dump.length.to_s
-      length_str = dump_length.rjust(9,'0')
-      final_data = length_str + object_dump
-    end
+      def object_dump p_data
+        object_dump = Marshal.dump(p_data)
+        dump_length = object_dump.length.to_s
+        length_str = dump_length.rjust(9,'0')
+        final_data = length_str + object_dump
+      end
 
-    def metaclass; class << self; self; end; end
+      def metaclass; class << self; self; end; end
 
-    def iattr_accessor *args
-      args.each do |a|
-        metaclass.instance_eval do
-          define_method("#{a}=") { |value|
-            instance_variable_set("@#{a}",value)
-          }
-          define_method(a) do |*values|
-            return instance_variable_get("@#{a}") if values.empty?
-            instance_variable_set("@#{a}",values.first)
+      def iattr_accessor *args
+        args.each do |a|
+          metaclass.instance_eval do
+            define_method("#{a}=") { |value|
+              instance_variable_set("@#{a}",value)
+            }
+            define_method(a) do |*values|
+              return instance_variable_get("@#{a}") if values.empty?
+              instance_variable_set("@#{a}",values.first)
+            end
+          end
+          class_eval do
+            define_method(a) {
+              self.class.send(a)
+            }
+            define_method("#{a}=") { |value|
+              self.class.send("#{a}=",value)
+            }
           end
         end
-        class_eval do
-          define_method(a) {
-            self.class.send(a)
-          }
-          define_method("#{a}=") { |value|
-            self.class.send("#{a}=",value)
-          }
-        end
       end
-    end
 
-    def em_worker_classify original_string
-      original_string.split('_').map {|x| x.capitalize}.join
-    end
+      def em_worker_classify original_string
+        original_string.split('_').map {|x| x.capitalize}.join
+      end
 
-    def config; Config::EM_WORKER_CONFIG; end
+      def config; Config::EM_WORKER_CONFIG; end
 
-    def compact(options = { })
-      options.delete_if { |key,value| value.nil? }
-      options
+      def compact(options = { })
+        options.delete_if { |key,value| value.nil? }
+        options
+      end
+
     end
 
     def self.load_config
