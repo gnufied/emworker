@@ -33,6 +33,7 @@ module EmWorker
         worker_name = options[:worker].to_s
         worker_name_key = gen_worker_key(worker_name,options[:worker_key])
         return if @@forked_workers[worker_name_key]
+        options[:final_worker_key] = worker_name_key
         @@forked_workers[worker_name_key] = OpenStruct.new(:options => options)
         fork_and_load(options)
       end
