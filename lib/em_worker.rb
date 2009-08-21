@@ -8,6 +8,7 @@ require "ostruct"
 require "attributes"
 require "chronic"
 require "time"
+require "daemons"
 
 module EmWorker
   VERSION = "0.0.1"

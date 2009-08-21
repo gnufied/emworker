@@ -2,8 +2,9 @@ module EmWorker
   class BaseWorker < EventMachine::Connection
     include Helper
     attr_accessor :server_ip,:server_port
-    attr_accessor :heartbeat_received
+    attr_accessor :heartbeat_received,:logger
     iattr_accessor :worker_name,:worker_key,:autoload
+
     @@boot_env_loaded = false
 
     def self.start_worker server_ip,server_port

@@ -2,12 +2,23 @@
 
 ** Should use tcp rather than unix sockets for communication between processes
 
-** Workers can be completely started/stopped on demand, out of process. In a nutshell, an 
+** Workers can be completely started/stopped on demand, out of process. In a nutshell, an
    individual worker can be started/stopped from monit and can reconnect to master process.
 
 ** Worker and Server crashes should be handled gracefully and logged properly.
 
 ** Can be clustered
 ** Should be able to auto-spawn workers on demand.
+** It should be possible to opt-in and opt-out out of boot environment loading.
+** It should be possible to use any klass and job queue klass as long as it supports
+   few required methods.
+** The error reporting should work at the earliest, possible solutions are:
+   - An "OK" response from server even for asynchronous method calls such as "async" or
+     "enq". If the worker exists return "OK" otherwise return something that will be
+     popped out as error.
+   - When a worker registers sending "HELO" message, it can also send method that the
+     worker supports, if user is trying to call a method that doesn't exist, master
+     worker can send error flag.
+
 
 

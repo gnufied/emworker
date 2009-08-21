@@ -39,12 +39,22 @@ module EmWorker
       end
 
       def fork_and_load options = {}
-        if(!(pid = fork))
-          #[STDOUT,STDIN,STDERR].each { |x| x.reopen(@@log_file) }
-          cmd_string = prepare_cmd_line(options)
-          exec(cmd_string)
-        end
-        Process.detach(pid)
+        fork_options = {
+          :mode => :exec,
+          :app_name => options[:final_worker_key],
+          :ontop => true,
+          :dir_mode => :script,
+          :ARGV => ["start"],
+          :log_output => true,
+          :dir =>config.s.app_root
+        }
+        Daemons.run(prepare_cmd_line(options),fork_options)
+#         if(!(pid = fork))
+#           #[STDOUT,STDIN,STDERR].each { |x| x.reopen(@@log_file) }
+#           cmd_string = prepare_cmd_line(options)
+#           exec(cmd_string)
+#         end
+#         Process.detach(pid)
       end
 
       def prepare_cmd_line options
